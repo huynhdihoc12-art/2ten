@@ -155,6 +155,20 @@ const layout = (title, content) => `
     .pag-btn:hover { background: rgba(255,255,255,0.1); }
     .pag-btn.active { background: var(--accent); border-color: var(--accent); color: white; }
     .pag-btn.disabled { opacity: 0.5; pointer-events: none; }
+
+    /* Chapter navigation */
+    .viewer-nav {
+      display: flex; align-items: center; justify-content: space-between;
+      gap: 1rem; margin: 1rem 0 1.5rem;
+    }
+    .nav-btn {
+      padding: 0.6rem 1rem; border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.1);
+      background: var(--card-bg); font-weight: 600;
+      transition: all 0.2s; min-width: 120px; text-align: center;
+    }
+    .nav-btn:hover { background: rgba(255,255,255,0.1); }
+    .nav-btn.disabled { opacity: 0.5; pointer-events: none; }
   </style>
 </head>
 <body>
@@ -346,7 +360,25 @@ app.get('/chapter/:id', async (req, res) => {
     if (chapRows.length === 0) return res.status(404).send('Chapter không tồn tại!');
     const c = chapRows[0];
 
+    const [prevRows] = await pool.query(
+      'SELECT id, title, chapter_num FROM chapters WHERE manga_id = ? AND chapter_num < ? ORDER BY chapter_num DESC LIMIT 1',
+      [c.manga_id, c.chapter_num]
+    );
+    const [nextRows] = await pool.query(
+      'SELECT id, title, chapter_num FROM chapters WHERE manga_id = ? AND chapter_num > ? ORDER BY chapter_num ASC LIMIT 1',
+      [c.manga_id, c.chapter_num]
+    );
+    const prevChap = prevRows[0] || null;
+    const nextChap = nextRows[0] || null;
+
     const [images] = await pool.query('SELECT * FROM chapter_images WHERE chapter_id = ? ORDER BY id ASC', [req.params.id]);
+
+    const chapterNavHtml = `
+      <div class="viewer-nav">
+        ${prevChap ? `<a class="nav-btn" href="/chapter/${prevChap.id}">← Prev</a>` : '<span class="nav-btn disabled">← Prev</span>'}
+        ${nextChap ? `<a class="nav-btn" href="/chapter/${nextChap.id}">Next →</a>` : '<span class="nav-btn disabled">Next →</span>'}
+      </div>
+    `;
 
     const imgsHtml = images.map(img => `
       <img src="${img.img_url}" loading="lazy" alt="page">
@@ -357,10 +389,14 @@ app.get('/chapter/:id', async (req, res) => {
         <a href="/manga/${c.manga_id}" class="back-btn">← Quay lại truyện</a>
         <h3 style="color: var(--text-muted)">${c.title} - ${images.length} trang</h3>
       </div>
+
+      ${chapterNavHtml}
       
       <div class="viewer">
         ${imgsHtml}
       </div>
+
+      ${chapterNavHtml}
     `));
   } catch (err) {
     res.status(500).send('Lỗi DB: ' + err.message);
