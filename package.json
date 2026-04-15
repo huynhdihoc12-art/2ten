@@ -1,0 +1,30 @@
+{
+  "name": "vinahentai-crawler",
+  "version": "1.0.0",
+  "description": "Crawler truyện tranh VinHentai với TiDB",
+  "main": "index.js",
+  "scripts": {
+    "test:parsers": "node test/test-parsers.js",
+    "setup": "node index.js setup",
+    "crawl:list": "node index.js list",
+    "crawl:manga": "node index.js manga",
+    "crawl:chapter": "node index.js chapter",
+    "crawl:all": "node index.js all",
+    "crawl:sync": "node index.js sync",
+    "status": "node index.js status",
+    "start": "node index.js all"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.6.7",
+    "cheerio": "^1.0.0",
+    "cli-progress": "^3.12.0",
+    "dotenv": "^16.4.5",
+    "express": "^5.2.1",
+    "mysql2": "^3.9.2",
+    "p-limit": "^3.1.0",
+    "winston": "^3.11.0"
+  }
+}
