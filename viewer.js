@@ -50,14 +50,18 @@ const layout = (title, content) => `
     header {
       background: rgba(15, 23, 42, 0.8);
       backdrop-filter: blur(12px);
-      position: sticky; top: 0; z-index: 50;
+      position: fixed; top: 0; left: 0; right: 0; z-index: 50;
       padding: 1rem 2rem;
       border-bottom: 1px solid rgba(255,255,255,0.05);
+      transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+    header.hidden {
+      transform: translateY(-100%);
     }
     header h1 { font-weight: 800; font-size: 1.5rem; letter-spacing: -0.5px; }
     header h1 span { color: var(--accent); }
 
-    main { max-width: 1200px; margin: 0 auto; padding: 2rem; }
+    main { max-width: 1200px; margin: 0 auto; padding: 2rem; padding-top: calc(2rem + 60px); }
 
     /* Grid layout cho danh sách truyện */
     .grid {
@@ -178,6 +182,21 @@ const layout = (title, content) => `
   <main>
     ${content}
   </main>
+<script>
+  (function () {
+    let lastY = 0;
+    const header = document.querySelector('header');
+    window.addEventListener('scroll', function () {
+      const currentY = window.scrollY;
+      if (currentY > lastY && currentY > 60) {
+        header.classList.add('hidden');
+      } else {
+        header.classList.remove('hidden');
+      }
+      lastY = currentY;
+    }, { passive: true });
+  })();
+</script>
 </body>
 </html>
 `;
